@@ -1,0 +1,12 @@
+const fs = require('fs');
+let content = fs.readFileSync('README.md', 'utf-8');
+content = content.replace('![Dashboard](public/assets/dashboard.png)', '![Dashboard](assets/Screenshot%20(268).png)\n*A comprehensive dashboard showing real-time statistics, active allocations, pending transfers, and maintenance alerts.*');
+content = content.replace('![Architecture Diagram](public/assets/architecture.png)', '');
+content = content.replace('![Assets List](public/assets/assets_list.png)', '![Assets Management](assets/Screenshot%20(269).png)\n*The Asset Management ledger where you can view, search, and filter hardware across the entire organization.*');
+content = content.replace('![Allocations](public/assets/allocations.png)', '![Allocations](assets/Screenshot%20(270).png)\n*The Asset Allocation workflow streamlines the process of assigning laptops and devices to specific employees.*');
+content = content.replace('![Resource Booking](public/assets/booking.png)', '![Resource Booking](assets/Screenshot%20(271).png)\n*An intuitive interface for reserving shared resources like meeting rooms and projectors.*');
+content = content.replace('![Reports](public/assets/reports.png)', '![Reports & Analytics](assets/Screenshot%20(272).png)\n*Detailed analytics dashboards for Administrators to monitor utilization rates and lifecycle statuses.*');
+content = content.replace('![Asset Details](public/assets/asset_details.png)', '');
+content = content.replace('## ?? Screenshots\n\n**Asset Details View:**\n\n\n---', '');
+fs.writeFileSync('README.md', content);
+console.log('Done');
