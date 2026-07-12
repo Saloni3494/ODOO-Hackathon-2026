@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { loginFn } from "../server-functions";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -21,19 +23,24 @@ function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
+  const login = useServerFn(loginFn);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !pw) {
       toast.error("Enter email and password");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await login({ data: { email, password: pw } });
       toast.success("Welcome back");
       navigate({ to: "/dashboard" });
-    }, 500);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

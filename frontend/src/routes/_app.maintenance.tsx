@@ -1,29 +1,43 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
-import { maintenance, type MaintenanceItem } from "@/lib/mock-data";
 import { toast } from "sonner";
+import { listMaintenanceRequestsFn, updateMaintenanceStageFn } from "../server-functions";
 
 export const Route = createFileRoute("/_app/maintenance")({
   component: Maintenance,
+  loader: async () => {
+    return listMaintenanceRequestsFn();
+  },
   head: () => ({ meta: [{ title: "Maintenance · AssetFlow" }] }),
 });
 
-const stages: MaintenanceItem["stage"][] = ["Pending", "Approved", "Technician Assigned", "In Progress", "Resolved"];
+const stages = ["PENDING", "APPROVED", "TECHNICIAN_ASSIGNED", "IN_PROGRESS", "RESOLVED"];
+const stageLabels: Record<string, string> = {
+  "PENDING": "Pending",
+  "APPROVED": "Approved",
+  "TECHNICIAN_ASSIGNED": "Technician Assigned",
+  "IN_PROGRESS": "In Progress",
+  "RESOLVED": "Resolved"
+};
 
 function Maintenance() {
-  const [items, setItems] = useState(maintenance);
+  const items = Route.useLoaderData();
+  const router = useRouter();
+  const updateStage = useServerFn(updateMaintenanceStageFn);
 
-  const advance = (id: string) => {
-    setItems((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m;
-        const idx = stages.indexOf(m.stage);
-        const next = stages[Math.min(idx + 1, stages.length - 1)];
-        toast.success(`Moved to ${next}`);
-        return { ...m, stage: next };
-      })
-    );
+  const advance = async (id: string, currentStage: string) => {
+    const idx = stages.indexOf(currentStage);
+    if (idx === stages.length - 1) return; // Already resolved
+    
+    const next = stages[idx + 1];
+    try {
+      await updateStage({ data: { id, stage: next } });
+      toast.success(`Moved to ${stageLabels[next]}`);
+      router.invalidate();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update stage");
+    }
   };
 
   return (
@@ -33,24 +47,28 @@ function Maintenance() {
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {stages.map((stage) => {
-          const list = items.filter((i) => i.stage === stage);
+          const list = items.filter((i: any) => i.status === stage);
           return (
             <div key={stage} className="rounded-2xl bg-card border border-border p-3 min-h-[320px]">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1 pb-2 border-b border-border">
-                {stage} <span className="text-foreground">({list.length})</span>
+                {stageLabels[stage]} <span className="text-foreground">({list.length})</span>
               </div>
               <div className="mt-3 space-y-2">
-                {list.map((m) => (
+                {list.map((m: any) => (
                   <Card
                     key={m.id}
-                    onClick={() => advance(m.id)}
+                    onClick={() => advance(m.id, m.status)}
                     className="p-3 bg-background border-border hover:border-primary/50 cursor-pointer rounded-lg"
                   >
-                    <div className="font-mono text-xs text-primary">{m.tag}</div>
-                    <div className="text-sm mt-1">{m.issue}</div>
-                    {m.technician && <div className="text-xs text-muted-foreground mt-1">tech: {m.technician}</div>}
+                    <div className="font-mono text-xs text-primary">{m.asset?.assetTag}</div>
+                    <div className="text-sm mt-1 font-medium">{m.asset?.name}</div>
+                    <div className="text-sm mt-1 text-muted-foreground">{m.issue}</div>
+                    {m.technicianId && <div className="text-xs text-muted-foreground mt-1">tech assigned</div>}
                   </Card>
                 ))}
+                {list.length === 0 && (
+                  <div className="text-xs text-muted-foreground italic px-1 py-4 text-center">Empty</div>
+                )}
               </div>
             </div>
           );
