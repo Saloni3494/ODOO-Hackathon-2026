@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   BarChart3,
   Bell,
+  FileCode2,
 } from "lucide-react";
 
 const items = [
@@ -21,6 +22,7 @@ const items = [
   { title: "Audit", url: "/audit", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Notifications", url: "/notifications", icon: Bell },
+  { title: "API Docs", url: "/api-docs", icon: FileCode2 },
 ];
 
 export function AppSidebar() {

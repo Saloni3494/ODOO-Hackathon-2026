@@ -8,15 +8,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { departments, categories, employees } from "@/lib/mock-data";
 import { toast } from "sonner";
+import { getOrganizationDataFn } from "../server-functions";
 
 export const Route = createFileRoute("/_app/organization")({
   component: Organization,
+  loader: async () => {
+    return getOrganizationDataFn();
+  },
   head: () => ({ meta: [{ title: "Organization setup · AssetFlow" }] }),
 });
 
 function Organization() {
+  const { departments, categories, employees } = Route.useLoaderData();
   const [tab, setTab] = useState("departments");
   const [open, setOpen] = useState(false);
 
@@ -58,19 +62,19 @@ function Organization() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Department</TableHead>
-                  <TableHead>Head</TableHead>
+                  <TableHead>Head / Manager</TableHead>
                   <TableHead>Parent Dept</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {departments.map((d) => (
+                {departments.map((d: any) => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium">{d.name}</TableCell>
-                    <TableCell>{d.head}</TableCell>
-                    <TableCell>{d.parent}</TableCell>
+                    <TableCell>{d.manager?.name || "Unassigned"}</TableCell>
+                    <TableCell>—</TableCell>
                     <TableCell>
-                      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs ${d.status === "Active" ? "bg-primary/15 text-primary border-primary/30" : "bg-muted-foreground/15 text-muted-foreground border-border"}`}>{d.status}</span>
+                      <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs bg-primary/15 text-primary border-primary/30">Active</span>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -81,10 +85,13 @@ function Organization() {
 
           <TabsContent value="categories">
             <Table>
-              <TableHeader><TableRow><TableHead>Category</TableHead><TableHead>Assets</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Category</TableHead><TableHead>Total Assets</TableHead></TableRow></TableHeader>
               <TableBody>
-                {categories.map((c) => (
-                  <TableRow key={c}><TableCell>{c}</TableCell><TableCell>{Math.floor(Math.random() * 80 + 5)}</TableCell></TableRow>
+                {categories.map((c: any) => (
+                  <TableRow key={c.id}>
+                    <TableCell>{c.name}</TableCell>
+                    <TableCell>{c._count.assets}</TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>
@@ -94,8 +101,15 @@ function Organization() {
             <Table>
               <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Department</TableHead><TableHead>Role</TableHead></TableRow></TableHeader>
               <TableBody>
-                {employees.map((e) => (
-                  <TableRow key={e.id}><TableCell>{e.name}</TableCell><TableCell>{e.email}</TableCell><TableCell>{e.department}</TableCell><TableCell>{e.role}</TableCell></TableRow>
+                {employees.map((e: any) => (
+                  <TableRow key={e.id}>
+                    <TableCell>{e.name}</TableCell>
+                    <TableCell>{e.email}</TableCell>
+                    <TableCell>{e.department?.name || "Unassigned"}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs bg-muted text-muted-foreground border-border">{e.role?.name}</span>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>

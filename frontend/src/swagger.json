@@ -1,0 +1,150 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AssetFlow API",
+    "description": "Enterprise API for Managing Assets, Allocations, and Workflows.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login"
+          }
+        }
+      }
+    },
+    "/assets": {
+      "get": {
+        "summary": "List all assets",
+        "responses": {
+          "200": {
+            "description": "Array of assets"
+          }
+        }
+      },
+      "post": {
+        "summary": "Register a new asset",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "categoryId": { "type": "string" },
+                  "isBookable": { "type": "boolean" },
+                  "departmentId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Asset created successfully"
+          }
+        }
+      }
+    },
+    "/allocations/allocate": {
+      "post": {
+        "summary": "Allocate an asset to an employee",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assetId": { "type": "string" },
+                  "userId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Allocation successful"
+          },
+          "400": {
+            "description": "Asset already allocated (Conflict)"
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "post": {
+        "summary": "Book a shared resource",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assetId": { "type": "string" },
+                  "userId": { "type": "string" },
+                  "startTime": { "type": "string", "format": "date-time" },
+                  "endTime": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Booking successful"
+          },
+          "400": {
+            "description": "Time slot overlap detected"
+          }
+        }
+      }
+    },
+    "/maintenance": {
+      "get": {
+        "summary": "Get active maintenance workflows",
+        "responses": {
+          "200": {
+            "description": "List of maintenance requests"
+          }
+        }
+      }
+    },
+    "/audit": {
+      "get": {
+        "summary": "Get active audit cycles and discrepancies",
+        "responses": {
+          "200": {
+            "description": "List of audits"
+          }
+        }
+      }
+    }
+  }
+}
