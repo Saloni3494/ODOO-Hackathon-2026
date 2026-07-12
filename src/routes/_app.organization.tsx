@@ -50,7 +50,7 @@ function Organization() {
         data: {
           userId: selectedUser.id,
           roleId: editRoleId,
-          departmentId: editDeptId || null
+          departmentId: editDeptId === "none" || !editDeptId ? null : editDeptId
         }
       });
       toast.success("Employee updated successfully");
@@ -108,7 +108,7 @@ function Organization() {
                 {departments.map((d: any) => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium">{d.name}</TableCell>
-                    <TableCell>{d.manager?.name || "Unassigned"}</TableCell>
+                    <TableCell>{d.head?.name || "Unassigned"}</TableCell>
                     <TableCell>—</TableCell>
                     <TableCell>
                       <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs bg-primary/15 text-primary border-primary/30">Active</span>

@@ -328,7 +328,7 @@ export const getOrganizationDataFn = createServerFn({ method: 'GET' })
   .handler(async () => {
     const departments = await prisma.department.findMany({
       include: {
-        manager: { select: { name: true } }
+        head: { select: { name: true } }
       }
     });
     
