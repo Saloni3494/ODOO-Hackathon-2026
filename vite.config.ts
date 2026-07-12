@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    ssr: {
+      // Prevents Vercel/Nitro from incorrectly chunking CJS dependencies like floating-ui
+      noExternal: ['@floating-ui/react-dom', '@floating-ui/react', '@floating-ui/dom', '@floating-ui/core']
+    }
+  }
 });
