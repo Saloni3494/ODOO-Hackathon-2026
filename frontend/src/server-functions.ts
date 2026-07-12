@@ -85,20 +85,27 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
     let maintenanceWhere: any = {};
     let bookingWhere: any = {};
     
+    let transferWhere: any = {};
+    
     if (!hasPermission(user.role, 'VIEW_ALL_REPORTS')) {
        assetWhere = { currentHolderId: user.id };
        maintenanceWhere = { reportedById: user.id };
        bookingWhere = { userId: user.id };
+       transferWhere = { OR: [{ fromUserId: user.id }, { toUserId: user.id }] };
     }
 
-    const [available, allocated, maintenance, activeBookings] = await Promise.all([
+    const now = new Date();
+
+    const [available, allocated, maintenance, activeBookings, pendingTransfers, overdueReturns] = await Promise.all([
       hasPermission(user.role, 'VIEW_ALL_REPORTS') ? prisma.asset.count({ where: { lifecycleStatus: 'AVAILABLE' } }) : 0,
       prisma.asset.count({ where: { ...assetWhere, lifecycleStatus: 'ALLOCATED' } }),
       prisma.maintenanceRequest.count({ where: { ...maintenanceWhere, status: 'PENDING' } }),
       prisma.booking.count({ where: { ...bookingWhere, status: 'ONGOING' } }),
+      prisma.transferRequest.count({ where: { ...transferWhere, status: 'PENDING' } }),
+      prisma.allocation.count({ where: { userId: user.id, status: 'ACTIVE', expectedReturnDate: { lt: now } } }),
     ]);
 
-    return { available, allocated, maintenance, activeBookings };
+    return { available, allocated, maintenance, activeBookings, pendingTransfers, overdueReturns };
   });
 
 // Asset Functions
@@ -335,8 +342,23 @@ export const getOrganizationDataFn = createServerFn({ method: 'GET' })
         role: { select: { name: true } }
       }
     });
+
+    const roles = await prisma.role.findMany();
     
-    return { departments, categories, employees };
+    return { departments, categories, employees, roles };
+  });
+
+export const updateEmployeeFn = createServerFn({ method: 'POST' })
+  .middleware([requirePermission('PROMOTE_EMPLOYEES')])
+  .validator((data: { userId: string, roleId: string, departmentId: string | null }) => data)
+  .handler(async ({ data }) => {
+    return prisma.user.update({
+      where: { id: data.userId },
+      data: {
+        roleId: data.roleId,
+        departmentId: data.departmentId
+      }
+    });
   });
 
 // Notifications Functions

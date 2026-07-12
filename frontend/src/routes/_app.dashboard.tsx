@@ -14,33 +14,37 @@ export const Route = createFileRoute("/_app/dashboard")({
 });
 
 function Dashboard() {
-  const { available, allocated, maintenance, activeBookings } = Route.useLoaderData();
+  const { available, allocated, maintenance, activeBookings, pendingTransfers, overdueReturns } = Route.useLoaderData();
   const { can } = useAuth();
 
   const stats = [
     { label: "Available", value: available },
     { label: "Allocated", value: allocated },
+    { label: "Pending Transfers", value: pendingTransfers },
     { label: "Maintenance Today", value: maintenance },
     { label: "Active Bookings", value: activeBookings },
+    { label: "Overdue Returns", value: overdueReturns, alert: overdueReturns > 0 },
   ];
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold">Today's Overview</h1>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((s) => (
-          <Card key={s.label} className="p-5 bg-card border-border rounded-2xl">
-            <div className="text-sm text-muted-foreground">{s.label}</div>
+          <Card key={s.label} className={`p-5 bg-card border-border rounded-2xl ${s.alert ? 'border-destructive bg-destructive/10 text-destructive' : ''}`}>
+            <div className={`text-sm ${s.alert ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>{s.label}</div>
             <div className="mt-2 text-3xl font-bold">{s.value}</div>
           </Card>
         ))}
       </div>
 
-      <div className="mt-6 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 flex items-center gap-3">
-        <AlertTriangle className="h-4 w-4 text-destructive" />
-        <p className="text-sm">Check upcoming overdue returns in the notifications panel.</p>
-      </div>
+      {overdueReturns > 0 && (
+        <div className="mt-6 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 flex items-center gap-3">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <p className="text-sm">You have {overdueReturns} asset(s) past their expected return date. Please check the notifications panel.</p>
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-3">
         {can('REGISTER_ASSET') && (

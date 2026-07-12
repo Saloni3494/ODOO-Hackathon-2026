@@ -77,7 +77,10 @@ function Reports() {
         </div>
       </Card>
 
-      <Button className="mt-6" variant="destructive" onClick={() => toast.success("Report exported to CSV successfully")}>Export report</Button>
+      <Button className="mt-6" variant="destructive" onClick={() => {
+        toast.success("Preparing PDF export...");
+        setTimeout(() => window.print(), 1000);
+      }}>Export report as PDF</Button>
     </div>
   );
 }

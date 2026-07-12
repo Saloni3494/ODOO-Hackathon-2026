@@ -41,6 +41,7 @@ function Assets() {
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [location, setLocation] = useState("");
+  const [isBookable, setIsBookable] = useState(false);
 
   const rows = useMemo(
     () =>
@@ -60,11 +61,12 @@ function Assets() {
     }
     
     try {
-      await registerAsset({ data: { name, categoryId, location } });
+      await registerAsset({ data: { name, categoryId, location, isBookable } });
       toast.success("Asset registered successfully");
       setOpen(false);
       setName("");
       setLocation("");
+      setIsBookable(false);
       router.invalidate(); // Refresh loader data
     } catch (e: any) {
       toast.error(e.message || "Failed to register asset");
@@ -99,6 +101,10 @@ function Assets() {
                     </Select>
                   </div>
                   <div><Label>Location</Label><Input value={location} onChange={e => setLocation(e.target.value)} className="mt-1" /></div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <input type="checkbox" id="isBookable" checked={isBookable} onChange={e => setIsBookable(e.target.checked)} className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
+                    <Label htmlFor="isBookable">Shared / Bookable Resource</Label>
+                  </div>
                 </div>
                 <DialogFooter><Button onClick={handleRegister}>Register</Button></DialogFooter>
               </DialogContent>

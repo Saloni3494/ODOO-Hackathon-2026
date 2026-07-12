@@ -33,6 +33,7 @@ function Allocation() {
   const [assetId, setAssetId] = useState("");
   const [toUserId, setToUserId] = useState("");
   const [reason, setReason] = useState("");
+  const [returnDate, setReturnDate] = useState("");
   
   const asset = assets.find((a: any) => a.id === assetId);
   const isAllocated = asset?.lifecycleStatus === "ALLOCATED";
@@ -46,11 +47,12 @@ function Allocation() {
         await requestTransfer({ data: { assetId, fromUserId: users[0]?.id, toUserId, reason } });
         toast.success("Transfer request submitted");
       } else {
-        await allocateAsset({ data: { assetId, userId: toUserId } });
+        await allocateAsset({ data: { assetId, userId: toUserId, expectedReturnDate: returnDate ? new Date(returnDate).toISOString() : undefined } });
         toast.success("Asset allocated successfully");
       }
       setReason("");
       setToUserId("");
+      setReturnDate("");
       router.invalidate();
     } catch (e: any) {
       toast.error(e.message || "Operation failed");
@@ -120,6 +122,13 @@ function Allocation() {
               </Select>
             </div>
           </div>
+          
+          {!isAllocated && (
+            <div className="mt-4">
+              <Label>Expected Return Date (Optional)</Label>
+              <Input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} className="mt-1 w-full md:w-1/2 bg-background" />
+            </div>
+          )}
         </div>
 
         <div>

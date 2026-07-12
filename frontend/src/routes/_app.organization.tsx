@@ -9,7 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { getOrganizationDataFn } from "../server-functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useRouter } from "@tanstack/react-router";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getOrganizationDataFn, updateEmployeeFn } from "../server-functions";
 
 export const Route = createFileRoute("/_app/organization")({
   component: Organization,
@@ -20,9 +23,43 @@ export const Route = createFileRoute("/_app/organization")({
 });
 
 function Organization() {
-  const { departments, categories, employees } = Route.useLoaderData();
+  const { departments, categories, employees, roles } = Route.useLoaderData();
+  const router = useRouter();
+  const updateEmployee = useServerFn(updateEmployeeFn);
+  
   const [tab, setTab] = useState("departments");
   const [open, setOpen] = useState(false);
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  
+  // Edit User State
+  const [editRoleId, setEditRoleId] = useState("");
+  const [editDeptId, setEditDeptId] = useState("");
+
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user);
+    setEditRoleId(user.roleId || "");
+    setEditDeptId(user.departmentId || "");
+    setEditUserOpen(true);
+  };
+
+  const submitEditUser = async () => {
+    if (!selectedUser) return;
+    try {
+      await updateEmployee({
+        data: {
+          userId: selectedUser.id,
+          roleId: editRoleId,
+          departmentId: editDeptId || null
+        }
+      });
+      toast.success("Employee updated successfully");
+      setEditUserOpen(false);
+      router.invalidate();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update employee");
+    }
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -99,7 +136,7 @@ function Organization() {
 
           <TabsContent value="employees">
             <Table>
-              <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Department</TableHead><TableHead>Role</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Department</TableHead><TableHead>Role</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
               <TableBody>
                 {employees.map((e: any) => (
                   <TableRow key={e.id}>
@@ -109,10 +146,51 @@ function Organization() {
                     <TableCell>
                       <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs bg-muted text-muted-foreground border-border">{e.role?.name}</span>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => handleEditUser(e)}>Edit</Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+
+            {/* Edit User Dialog */}
+            <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+              <DialogContent className="bg-card border-border">
+                <DialogHeader><DialogTitle>Edit Employee</DialogTitle></DialogHeader>
+                {selectedUser && (
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label>Employee Name</Label>
+                      <Input value={selectedUser.name} disabled className="mt-1 bg-muted" />
+                    </div>
+                    <div>
+                      <Label>Role</Label>
+                      <Select value={editRoleId} onValueChange={setEditRoleId}>
+                        <SelectTrigger className="mt-1"><SelectValue placeholder="Select Role" /></SelectTrigger>
+                        <SelectContent>
+                          {roles?.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Department</Label>
+                      <Select value={editDeptId} onValueChange={setEditDeptId}>
+                        <SelectTrigger className="mt-1"><SelectValue placeholder="No Department" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Department</SelectItem>
+                          {departments?.map((d: any) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+                <DialogFooter>
+                  <Button onClick={submitEditUser}>Save Changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
           </TabsContent>
         </Tabs>
       </Card>
