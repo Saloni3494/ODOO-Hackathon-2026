@@ -114,9 +114,13 @@ AssetFlow introduces a strict, Role-Based Access Control (RBAC) architecture tha
   - Search/filter by Asset Tag, Serial Number, QR code, category, status, department, or location.
   - Lifecycle status shown per asset: Available, Allocated, Reserved, Under Maintenance, Lost, Retired, Disposed.
   - Per-asset history: allocation history + maintenance history.
+  - **Dynamic QR Codes:** Clickable, auto-generated QR codes that fetch real-time asset data, enabling quick physical tracking and label printing on the fly.
 
 ![Assets Management](assets/Screenshot%20(269).png)
 *The Asset Management ledger where you can view, search, and filter hardware across the entire organization.*
+
+![QR Code Modal](assets/Screenshot%20(273).png)
+*Clicking the QR icon inside the ledger opens an interactive, high-resolution modal for instant scanning or printing—serving as a seamless bridge between the digital database and the physical inventory.*
 
 ### 5. Asset Allocation & Transfer Screen
 - **Purpose:** Manage who holds what, with explicit conflict rules.

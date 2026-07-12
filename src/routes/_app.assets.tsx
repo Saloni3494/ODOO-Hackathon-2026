@@ -150,7 +150,31 @@ function Assets() {
                   <TableCell><StatusPill status={a.lifecycleStatus} /></TableCell>
                   <TableCell>{a.location}</TableCell>
                   <TableCell>
-                    {a.qrCodeUrl ? <img src={a.qrCodeUrl} alt="QR" className="h-6 w-6" /> : <QrCode className="h-4 w-4 text-muted-foreground" />}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <img 
+                          src={a.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify({ assetTag: a.assetTag }))}`} 
+                          alt="QR" 
+                          className="h-6 w-6 cursor-pointer hover:opacity-80 transition-all hover:scale-110" 
+                          title="Click to enlarge" 
+                        />
+                      </DialogTrigger>
+                      <DialogContent className="bg-card border-border sm:max-w-sm flex flex-col items-center justify-center p-8">
+                        <DialogHeader>
+                          <DialogTitle className="text-center">{a.assetTag} QR Code</DialogTitle>
+                        </DialogHeader>
+                        <div className="bg-white p-4 rounded-xl shadow-sm mt-4">
+                          <img 
+                            src={a.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify({ assetTag: a.assetTag }))}`} 
+                            alt="QR Code Full" 
+                            className="w-48 h-48 object-contain" 
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-6 text-center">
+                          Scan this code to quickly identify the asset or print it to attach a physical label.
+                        </p>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))}
