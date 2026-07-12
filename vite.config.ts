@@ -14,6 +14,12 @@ export default defineConfig({
   },
   nitro: {
     preset: "node-server",
+    // @ts-ignore
+    minify: false,
+    // @ts-ignore
+    experimental: {
+      chunkOptimization: false
+    }
   },
   vite: {
     build: {
