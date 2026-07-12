@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { listAssetsFn, listUsersFn, requestTransferFn, returnAssetFn, allocateAssetFn } from "../server-functions";
+import { useAuth } from "../lib/auth-context";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_app/allocation")({
   component: Allocation,
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/_app/allocation")({
 
 function Allocation() {
   const { assets, users } = Route.useLoaderData();
+  const { can } = useAuth();
   const router = useRouter();
   
   const requestTransfer = useServerFn(requestTransferFn);
@@ -68,7 +71,12 @@ function Allocation() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold">Allocation & Transfer</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Allocation & Transfer</h1>
+        {can('ALLOCATE_ASSET') && (
+          <Button variant="outline"><ArrowLeftRight className="mr-2 h-4 w-4" /> Bulk Transfer</Button>
+        )}
+      </div>
 
       <Card className="mt-6 bg-card border-border rounded-2xl p-6 space-y-4">
         <div>
@@ -129,6 +137,3 @@ function Allocation() {
     </div>
   );
 }
-
-// Quick polyfill since we removed Input from imports accidentally
-import { Input } from "@/components/ui/input";

@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { listMaintenanceRequestsFn, updateMaintenanceStageFn } from "../server-functions";
+import { useAuth } from "../lib/auth-context";
 
 export const Route = createFileRoute("/_app/maintenance")({
   component: Maintenance,
@@ -25,6 +26,7 @@ function Maintenance() {
   const items = Route.useLoaderData();
   const router = useRouter();
   const updateStage = useServerFn(updateMaintenanceStageFn);
+  const { can } = useAuth();
 
   const advance = async (id: string, currentStage: string) => {
     const idx = stages.indexOf(currentStage);
@@ -57,8 +59,8 @@ function Maintenance() {
                 {list.map((m: any) => (
                   <Card
                     key={m.id}
-                    onClick={() => advance(m.id, m.status)}
-                    className="p-3 bg-background border-border hover:border-primary/50 cursor-pointer rounded-lg"
+                    onClick={() => can('APPROVE_MAINTENANCE') ? advance(m.id, m.status) : null}
+                    className={`p-3 bg-background border-border rounded-lg ${can('APPROVE_MAINTENANCE') ? 'hover:border-primary/50 cursor-pointer' : ''}`}
                   >
                     <div className="font-mono text-xs text-primary">{m.asset?.assetTag}</div>
                     <div className="text-sm mt-1 font-medium">{m.asset?.name}</div>

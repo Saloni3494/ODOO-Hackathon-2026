@@ -12,6 +12,7 @@ import { StatusPill } from "@/components/StatusPill";
 import { Plus, QrCode, Search } from "lucide-react";
 import { toast } from "sonner";
 import { listAssetsFn, listCategoriesFn, registerAssetFn } from "../server-functions";
+import { useAuth } from "../lib/auth-context";
 
 export const Route = createFileRoute("/_app/assets")({
   component: Assets,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_app/assets")({
 
 function Assets() {
   const { assets, categories } = Route.useLoaderData();
+  const { can } = useAuth();
   const router = useRouter();
   const registerAsset = useServerFn(registerAssetFn);
   
@@ -81,25 +83,27 @@ function Assets() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by tag, serial, or QR code..." className="pl-9 rounded-full bg-background" />
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Register Asset</Button></DialogTrigger>
-            <DialogContent className="bg-card border-border">
-              <DialogHeader><DialogTitle>Register Asset</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div><Label>Name</Label><Input value={name} onChange={e => setName(e.target.value)} className="mt-1" /></div>
-                <div><Label>Category</Label>
-                  <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+          {can("REGISTER_ASSET") && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Register Asset</Button></DialogTrigger>
+              <DialogContent className="bg-card border-border">
+                <DialogHeader><DialogTitle>Register Asset</DialogTitle></DialogHeader>
+                <div className="space-y-3">
+                  <div><Label>Name</Label><Input value={name} onChange={e => setName(e.target.value)} className="mt-1" /></div>
+                  <div><Label>Category</Label>
+                    <Select value={categoryId} onValueChange={setCategoryId}>
+                      <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Location</Label><Input value={location} onChange={e => setLocation(e.target.value)} className="mt-1" /></div>
                 </div>
-                <div><Label>Location</Label><Input value={location} onChange={e => setLocation(e.target.value)} className="mt-1" /></div>
-              </div>
-              <DialogFooter><Button onClick={handleRegister}>Register</Button></DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <DialogFooter><Button onClick={handleRegister}>Register</Button></DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="mt-4 flex gap-3 flex-wrap">

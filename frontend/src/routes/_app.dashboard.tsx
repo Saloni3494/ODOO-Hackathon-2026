@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Plus, Calendar, FileText } from "lucide-react";
 import { getDashboardStatsFn } from "../server-functions";
+import { useAuth } from "../lib/auth-context";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function Dashboard() {
   const { available, allocated, maintenance, activeBookings } = Route.useLoaderData();
+  const { can } = useAuth();
 
   const stats = [
     { label: "Available", value: available },
@@ -41,7 +43,9 @@ function Dashboard() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Button asChild><Link to="/assets"><Plus className="h-4 w-4 mr-1" /> Register asset</Link></Button>
+        {can('REGISTER_ASSET') && (
+          <Button asChild><Link to="/assets"><Plus className="h-4 w-4 mr-1" /> Register asset</Link></Button>
+        )}
         <Button asChild variant="outline"><Link to="/resources"><Calendar className="h-4 w-4 mr-1" /> Book resource</Link></Button>
         <Button asChild variant="outline"><Link to="/maintenance"><FileText className="h-4 w-4 mr-1" /> Raise request</Link></Button>
       </div>

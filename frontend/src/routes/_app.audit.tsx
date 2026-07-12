@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { listAuditCyclesFn, closeAuditCycleFn } from "../server-functions";
+import { useAuth } from "../lib/auth-context";
 
 export const Route = createFileRoute("/_app/audit")({
   component: Audit,
@@ -28,6 +29,7 @@ function Audit() {
   const auditCycles = Route.useLoaderData();
   const router = useRouter();
   const closeAuditCycle = useServerFn(closeAuditCycleFn);
+  const { can } = useAuth();
 
   // For the hackathon demo, we just show the first active or most recent cycle
   const activeCycle = auditCycles[0];
@@ -108,7 +110,7 @@ function Audit() {
           </div>
         )}
 
-        {activeCycle.status !== 'CLOSED' && (
+        {activeCycle.status !== 'CLOSED' && can('RESOLVE_AUDIT') && (
           <Button onClick={handleClose}>Close audit cycle</Button>
         )}
       </Card>
