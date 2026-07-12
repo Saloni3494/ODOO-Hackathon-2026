@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
-    "start": "vite dev --host 0.0.0.0 --port 10000",
+    "build": "vite build && node fix-build.js",
+    "start": "node .output/server/index.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

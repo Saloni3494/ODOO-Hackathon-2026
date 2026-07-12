@@ -2,7 +2,6 @@
 // or the app will break with duplicate plugins:
 //   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
-//     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
@@ -15,10 +14,10 @@ export default defineConfig({
   nitro: {
     preset: "node-server",
     // @ts-ignore
-    minify: false,
-    // @ts-ignore
-    experimental: {
-      chunkOptimization: false
+    rollupConfig: {
+      output: {
+        inlineDynamicImports: true
+      }
     }
   },
   vite: {
@@ -29,7 +28,6 @@ export default defineConfig({
       minify: false,
     },
     ssr: {
-      // Prevents Vercel/Nitro from incorrectly chunking CJS dependencies like floating-ui
       external: ['@floating-ui/react-dom', '@floating-ui/react', '@floating-ui/dom', '@floating-ui/core']
     }
   }
